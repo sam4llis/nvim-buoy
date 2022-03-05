@@ -38,7 +38,7 @@ command:
 :lua window:open()
 ```
 
-Closing the floating window is possible using the usual `:q` or:
+Closing the floating window is possible using `:q` or:
 
 <!-- TODO: add a gif here. -->
 ```
