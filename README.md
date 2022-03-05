@@ -2,8 +2,8 @@
 
 A Neovim plugin to create floating window UI components.
 
-**NOTE:** This plugin is experimental at the moment. More information will be
-added here in the coming months.
+**NOTE:** This plugin is experimental at the moment. Documentation and further
+information will be added here in the coming months.
 
 ## Installation
 
