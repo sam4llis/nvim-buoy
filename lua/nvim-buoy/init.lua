@@ -1,5 +1,7 @@
--- TODO: change instance.buf and self.buf from -1 to nil.
-if vim.fn.has('nvim') == 0 then
+-- TODO: toggle doesnt work after quitting an open instance.
+if vim.fn.has('nvim-0.6.0') ~= 1 then
+  vim.api.nvim_err_writeln("The plugin 'nvim-buoy' requires Neovim 0.6.0.")
+  vim.api.nvim_err_writeln("Please update your Neovim.")
   return
 end
 
