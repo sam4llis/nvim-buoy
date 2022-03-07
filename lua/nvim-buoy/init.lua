@@ -5,39 +5,56 @@ if vim.fn.has('nvim-0.6.0') ~= 1 then
   return
 end
 
+local M = {}
+M.__index = M
 
-Window = {}
-Window.__index = Window
+--
+-- @desc
+--   Creates a new floating window instance.
+-- @param opts: table
+--   Window configuration options.
+--   keys: percentage, winblend
+-- @return table:
+--   Metadata for the new window instance.
+--   keys: buf, win, opts
+--
+M.new = function (self, opts)
+  local self = setmetatable({}, M)
 
+  self.buf  = nil
+  self.win  = nil
+  self.opts = require('nvim-buoy.utils').get_window_opts(opts)
 
-function Window.new(opts)
-  local instance = setmetatable({}, Window)
-
-  instance.buf  = -1
-  instance.win  = nil
-  instance.pid  = nil
-  instance.opts = opts
-
-  return instance
+  return self
 end
 
-
-function Window:open()
+--
+-- @desc
+--   Opens a new floating window buffer if the buffer doesn't exist. Otherwise,
+--   the function opens a previously created floating window instance if it is
+--   not visible.
+--
+M.open = function (self)
   local buf
-
   if self.buf and vim.api.nvim_buf_is_loaded(self.buf) then
     buf = self.buf
   else
     buf = vim.api.nvim_create_buf(false, true)
   end
 
-  local opts = get_opts(self.opts)
-  self.win = vim.api.nvim_open_win(buf, true, opts)
+  -- Create the floating window with specified buffer and options.
+  self.win = vim.api.nvim_open_win(buf, true, self.opts)
   self.buf = buf
 end
 
-
-function Window:close(force)
+--
+-- @desc
+--   Closes a floating window instance.
+-- @param force: bool
+--   Will delete the floating window buffer if set to true, otherwise, it will
+--   close/hide the buffer.
+--
+M.close = function (self, force)
   if not self.win then
     return
   end
@@ -48,72 +65,30 @@ function Window:close(force)
   end
 
   if force then
-    vim.fn.jobstop(self.pid)
-
     if vim.api.nvim_buf_is_loaded(self.buf) then
       vim.api.nvim_buf_delete(self.buf, { force = true })
     end
 
-    self.buf = -1
+    self.buf = nil
     self.win = nil
-    self.pid = nil
   end
 end
 
+--
+-- @desc
+--   Toggles a floating window buffer between visible and hidden.
+-- @param force: bool
+--   Will delete the floating window buffer if set to true, otherwise, it will
+--   close/hide the buffer.
+--
+M.toggle = function (self, force)
+  local force = force or nil
 
-function Window:toggle(cmd)
   if not self.win then
-    self:open(cmd)
+    self:open()
   else
-    self:close()
+    self:close(force)
   end
 end
 
-
-local function get_defaults(opts, defs)
-  opts = opts or {}
-  opts = vim.deepcopy(opts)
-
-  for k, v in pairs(defs) do
-    if opts[k] == nil then
-      opts[k] = v
-    end
-  end
-
-  return opts
-end
-
-
-function get_opts(opts)
-  local opts = get_defaults(opts, {percentage=0.8, winblend=15})
-
-  local width = math.floor(vim.o.columns * opts.percentage)
-  local height = math.floor(vim.o.lines * opts.percentage)
-
-  local top = math.floor(((vim.o.lines - height) / 2) - 1)
-  local left = math.floor((vim.o.columns - width) / 2)
-
-  local opts = {
-    relative = 'editor',
-    row = top,
-    col = left,
-    width = width,
-    height = height,
-    style = 'minimal',
-    border = {
-      { ' ', 'NormalFloat' },
-      { ' ', 'NormalFloat' },
-      { ' ', 'NormalFloat' },
-      { ' ', 'NormalFloat' },
-      { ' ', 'NormalFloat' },
-      { ' ', 'NormalFloat' },
-      { ' ', 'NormalFloat' },
-      { ' ', 'NormalFloat' },
-    },
-  }
-
-  return opts
-end
-
-
-return Window
+return M
