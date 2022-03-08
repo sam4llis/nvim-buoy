@@ -1,5 +1,5 @@
 local M = {}
-M.default_opts = { percentage = 0.7, winblend=15 }
+M.default_opts = { percentage = 0.40, winblend = 50, position = 'C' }
 
 --
 -- Function that gets the default options for a floating window. Default
@@ -37,8 +37,26 @@ M.get_window_opts = function (opts)
   local width = math.floor(vim.o.columns * opts.percentage)
   local height = math.floor(vim.o.lines * opts.percentage)
 
-  local top = math.floor(((vim.o.lines - height) / 2) - 1)
-  local left = math.floor((vim.o.columns - width) / 2)
+  -- TODO: probably best in 'dictionary style'
+  local top
+  local left
+
+  if opts.position == 'C' then
+    top = math.floor(((vim.o.lines - height) / 2) - 1)
+    left = math.floor((vim.o.columns - width) / 2)
+  elseif opts.position == 'NW' then
+    top = 0
+    left = 0
+  elseif opts.position == 'NE' then
+    top = 0
+    left = vim.o.columns
+  elseif opts.position == 'SW' then
+    top = vim.o.lines
+    left = 0
+  elseif opts.position == 'SE' then
+    top = vim.o.lines
+    left = vim.o.columns
+  end
 
   local window_opts = {
     relative = 'editor',
